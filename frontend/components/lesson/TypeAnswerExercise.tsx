@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface TypeAnswerProps {
   prompt: string;
@@ -15,6 +15,8 @@ export const TypeAnswerExercise: React.FC<TypeAnswerProps> = ({
 }) => {
   const [value, setValue] = useState("");
 
+  useEffect(() => { setValue(""); }, [prompt]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setValue(val);
@@ -23,19 +25,19 @@ export const TypeAnswerExercise: React.FC<TypeAnswerProps> = ({
 
   return (
     <div className="w-full max-w-xl mx-auto py-6">
-      <h2 className="text-2xl font-extrabold text-gray-800 mb-6">{prompt}</h2>
+      <h2 className="text-2xl font-extrabold mb-6" style={{ color: "var(--foreground)" }}>
+        {prompt}
+      </h2>
 
-      <div className="relative">
-        <input
-          type="text"
-          value={value}
-          onChange={handleChange}
-          disabled={disabled}
-          placeholder="Type in Spanish..."
-          className="w-full p-4 rounded-2xl border-2 border-b-4 border-gray-200 focus:border-sky-400 focus:outline-none font-bold text-lg text-gray-800 bg-white shadow-xs transition disabled:bg-gray-100 disabled:text-gray-500"
-          autoFocus
-        />
-      </div>
+      <input
+        type="text"
+        value={value}
+        onChange={handleChange}
+        disabled={disabled}
+        placeholder="Type your answer..."
+        className="theme-input w-full p-4 rounded-2xl font-bold text-lg shadow-xs transition"
+        autoFocus
+      />
     </div>
   );
 };

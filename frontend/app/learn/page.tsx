@@ -6,8 +6,10 @@ import { getLearner, getCourse, refillHearts } from "@/lib/api";
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { LearningPath } from "@/components/learning/LearningPath";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LearnPage() {
+  const { dbUser } = useAuth();
   const [learner, setLearner] = useState<Learner | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,33 +34,37 @@ export default function LearnPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [dbUser?.id]);
 
   const handleRefillHearts = async () => {
     try {
       const updated = await refillHearts();
       setLearner(updated);
-    } catch (err) {
+    } catch {
       alert("Failed to refill hearts");
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <div className="w-14 h-14 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-extrabold text-gray-600 text-sm">Loading your learning path...</p>
+        <p className="font-extrabold text-sm" style={{ color: "var(--muted-foreground)" }}>
+          Loading your learning path...
+        </p>
       </div>
     );
   }
 
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <div className="card-duo p-8 max-w-sm w-full">
           <span className="text-4xl mb-3 block">⚠️</span>
-          <h2 className="text-xl font-extrabold text-gray-800 mb-2">Something went wrong</h2>
-          <p className="text-xs text-gray-500 mb-6">{error || "Could not load course path."}</p>
+          <h2 className="text-xl font-extrabold mb-2">Something went wrong</h2>
+          <p className="text-xs mb-6" style={{ color: "var(--muted-foreground)" }}>
+            {error || "Could not load course path."}
+          </p>
           <button
             onClick={fetchData}
             className="btn-duo-green w-full py-3 rounded-xl font-extrabold text-sm uppercase"
@@ -71,7 +77,7 @@ export default function LearnPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <TopBar learner={learner} onRefillClick={handleRefillHearts} />
       <main className="max-w-2xl mx-auto pt-4">
         <LearningPath course={course} />

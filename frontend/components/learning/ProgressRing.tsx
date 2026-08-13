@@ -22,16 +22,16 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg height={radius * 2} width={radius * 2} className="transform -rotate-90">
-        {/* Background Circle */}
+        {/* Background track */}
         <circle
-          stroke="#e5e5e5"
+          stroke="var(--border)"
           fill="transparent"
           strokeWidth={stroke}
           r={normalizedRadius}
           cx={radius}
           cy={radius}
         />
-        {/* Progress Fill Circle */}
+        {/* Progress fill */}
         <circle
           stroke="#58cc02"
           fill="transparent"

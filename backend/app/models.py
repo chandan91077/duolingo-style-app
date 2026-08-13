@@ -16,6 +16,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    firebase_uid = Column(String, unique=True, index=True, nullable=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     avatar = Column(String, nullable=True)

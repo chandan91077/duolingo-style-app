@@ -12,11 +12,13 @@ from app.schemas import (
 )
 from app.services.lesson_service import LessonService
 
+from app.deps import get_current_user_id
+
 router = APIRouter(prefix="/api/lessons", tags=["Lessons"])
 
 
 @router.get("/{lesson_id}", response_model=LessonSchema)
-def get_lesson(lesson_id: int, user_id: int = 1, db: Session = Depends(get_db)):
+def get_lesson(lesson_id: int, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Returns lesson details along with parsed exercises.
     """
@@ -72,7 +74,7 @@ def get_lesson(lesson_id: int, user_id: int = 1, db: Session = Depends(get_db)):
 def submit_answer(
     lesson_id: int,
     submission: AnswerSubmission,
-    user_id: int = 1,
+    user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -96,7 +98,7 @@ def submit_answer(
 
 
 @router.post("/{lesson_id}/complete", response_model=LessonCompleteResponse)
-def complete_lesson(lesson_id: int, user_id: int = 1, db: Session = Depends(get_db)):
+def complete_lesson(lesson_id: int, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Completes lesson, awards XP, updates streak, unlocks skills.
     """

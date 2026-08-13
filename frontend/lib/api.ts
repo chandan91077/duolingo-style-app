@@ -12,6 +12,21 @@ import {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+function getActiveUserId(): number | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem("duo-user-id");
+  return stored ? parseInt(stored, 10) : null;
+}
+
+function getHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...customHeaders };
+  const userId = getActiveUserId();
+  if (userId) {
+    headers["X-User-Id"] = userId.toString();
+  }
+  return headers;
+}
+
 function transformLearner(raw: RawLearnerResponse): Learner {
   return {
     id: raw.id,
@@ -27,9 +42,39 @@ function transformLearner(raw: RawLearnerResponse): Learner {
   };
 }
 
+export async function syncUser(firebaseUser: {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}): Promise<Learner> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/sync`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      firebase_uid: firebaseUser.uid,
+      email: firebaseUser.email || `${firebaseUser.uid}@guest.duolingo.app`,
+      name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Learner",
+      avatar: firebaseUser.photoURL || "🚀",
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to sync user with backend");
+  }
+
+  const raw: RawLearnerResponse = await res.json();
+  const learner = transformLearner(raw);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("duo-user-id", learner.id.toString());
+  }
+  return learner;
+}
+
 export async function getLearner(): Promise<Learner> {
   const res = await fetch(`${API_BASE_URL}/api/learner`, {
     cache: "no-store",
+    headers: getHeaders(),
   });
   if (!res.ok) {
     throw new Error("Failed to fetch learner details");
@@ -41,7 +86,7 @@ export async function getLearner(): Promise<Learner> {
 export async function refillHearts(): Promise<Learner> {
   const res = await fetch(`${API_BASE_URL}/api/learner/refill-hearts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders({ "Content-Type": "application/json" }),
   });
   if (!res.ok) {
     throw new Error("Failed to refill hearts");
@@ -53,6 +98,7 @@ export async function refillHearts(): Promise<Learner> {
 export async function getCourse(): Promise<Course> {
   const res = await fetch(`${API_BASE_URL}/api/course`, {
     cache: "no-store",
+    headers: getHeaders(),
   });
   if (!res.ok) {
     throw new Error("Failed to fetch course path");
@@ -63,6 +109,7 @@ export async function getCourse(): Promise<Course> {
 export async function getLesson(lessonId: number): Promise<Lesson> {
   const res = await fetch(`${API_BASE_URL}/api/lessons/${lessonId}`, {
     cache: "no-store",
+    headers: getHeaders(),
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch lesson #${lessonId}`);
@@ -77,7 +124,7 @@ export async function submitAnswer(
 ): Promise<AnswerResponse> {
   const res = await fetch(`${API_BASE_URL}/api/lessons/${lessonId}/answer`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ exercise_id: exerciseId, answer }),
   });
 
@@ -94,7 +141,7 @@ export async function completeLesson(
 ): Promise<LessonCompleteResponse> {
   const res = await fetch(`${API_BASE_URL}/api/lessons/${lessonId}/complete`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders({ "Content-Type": "application/json" }),
   });
 
   if (!res.ok) {
@@ -104,9 +151,14 @@ export async function completeLesson(
   return res.json();
 }
 
-export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+export async function getLeaderboard(userId?: number): Promise<LeaderboardEntry[]> {
+  const customHeaders: Record<string, string> = {};
+  if (userId) {
+    customHeaders["X-User-Id"] = userId.toString();
+  }
   const res = await fetch(`${API_BASE_URL}/api/leaderboard`, {
     cache: "no-store",
+    headers: getHeaders(customHeaders),
   });
   if (!res.ok) {
     throw new Error("Failed to fetch leaderboard");
@@ -117,6 +169,7 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
 export async function getProfile(): Promise<ProfileData> {
   const res = await fetch(`${API_BASE_URL}/api/profile`, {
     cache: "no-store",
+    headers: getHeaders(),
   });
   if (!res.ok) {
     throw new Error("Failed to fetch learner profile");

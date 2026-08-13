@@ -10,12 +10,13 @@ from app.models import (
 )
 from app.schemas import ProfileResponse, LearnerResponse, AchievementSchema
 from app.services.progress_service import ProgressService
+from app.deps import get_current_user_id
 
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
 
 @router.get("", response_model=ProfileResponse)
-def get_profile(user_id: int = 1, db: Session = Depends(get_db)):
+def get_profile(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Returns user profile stats, completed counts, achievements, and daily goal progress.
     """

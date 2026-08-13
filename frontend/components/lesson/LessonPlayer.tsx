@@ -3,63 +3,51 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lesson, LessonCompleteResponse } from "@/lib/types";
-import { submitAnswer, completeLesson, refillHearts } from "@/lib/api";
+import { submitAnswer, completeLesson } from "@/lib/api";
 import { LessonProgress } from "./LessonProgress";
 import { ExerciseRenderer } from "./ExerciseRenderer";
 import { FeedbackBar } from "./FeedbackBar";
 import { OutOfHeartsModal } from "./OutOfHeartsModal";
 import { LessonCelebration } from "./LessonCelebration";
 
+import { useAuth } from "@/context/AuthContext";
+
 interface LessonPlayerProps {
   lesson: Lesson;
-  initialHearts: number;
+  initialHearts?: number;
 }
 
 export const LessonPlayer: React.FC<LessonPlayerProps> = ({
   lesson,
-  initialHearts,
+  initialHearts = 5,
 }) => {
   const router = useRouter();
+  const { refreshUser, refillHearts: contextRefillHearts } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [feedback, setFeedback] = useState<{
-    correctAnswer?: string;
-    explanation?: string;
-  }>({});
+  const [feedback, setFeedback] = useState<{ correctAnswer?: string; explanation?: string }>({});
   const [hearts, setHearts] = useState(initialHearts);
-  const [showOutOfHeartsModal, setShowOutOfHeartsModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [completionSummary, setCompletionSummary] =
-    useState<LessonCompleteResponse | null>(null);
+  const [completionSummary, setCompletionSummary] = useState<LessonCompleteResponse | null>(null);
+  const [showOutOfHeartsModal, setShowOutOfHeartsModal] = useState(false);
 
   const currentExercise = lesson.exercises[currentIndex];
   const totalExercises = lesson.exercises.length;
 
   const handleCheck = async () => {
     if (!currentExercise || selectedAnswer === null || isSubmitting) return;
-
     setIsSubmitting(true);
     try {
-      const res = await submitAnswer(
-        lesson.id,
-        currentExercise.id,
-        selectedAnswer
-      );
-
+      const res = await submitAnswer(lesson.id, currentExercise.id, selectedAnswer);
       setIsAnswered(true);
       setIsCorrect(res.correct);
-      setFeedback({
-        correctAnswer: res.correct_answer,
-        explanation: res.explanation,
-      });
+      setFeedback({ correctAnswer: res.correct_answer, explanation: res.explanation });
       setHearts(res.hearts);
-
-      if (res.hearts <= 0) {
-        setShowOutOfHeartsModal(true);
-      }
+      refreshUser();
+      if (res.hearts <= 0) setShowOutOfHeartsModal(true);
     } catch (err: any) {
       alert(err.message || "Error validating answer");
     } finally {
@@ -69,19 +57,18 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   const handleContinue = async () => {
     if (currentIndex + 1 < totalExercises) {
-      // Move to next exercise
       setCurrentIndex(currentIndex + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
       setIsCorrect(null);
       setFeedback({});
     } else {
-      // Completed all exercises in lesson
       setIsSubmitting(true);
       try {
         const completeRes = await completeLesson(lesson.id);
         setCompletionSummary(completeRes);
         setIsCompleted(true);
+        refreshUser();
       } catch (err: any) {
         alert(err.message || "Failed to finalize lesson");
       } finally {
@@ -92,10 +79,10 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   const handleRefillHearts = async () => {
     try {
-      const updatedLearner = await refillHearts();
+      const updatedLearner = await contextRefillHearts();
       setHearts(updatedLearner.hearts);
       setShowOutOfHeartsModal(false);
-    } catch (err) {
+    } catch {
       alert("Failed to refill hearts");
     }
   };
@@ -106,7 +93,10 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   if (!currentExercise) {
     return (
-      <div className="p-12 text-center text-gray-500 font-bold">
+      <div
+        className="p-12 text-center font-bold"
+        style={{ color: "var(--muted-foreground)" }}
+      >
         No exercises found in this lesson.
       </div>
     );
@@ -118,15 +108,13 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     !isAnswered;
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gray-50 pb-32">
-      {/* Top Header */}
+    <div className="min-h-screen flex flex-col justify-between pb-32">
       <LessonProgress
         currentStep={currentIndex + 1}
         totalSteps={totalExercises}
         hearts={hearts}
       />
 
-      {/* Main Exercise View */}
       <main className="flex-1 flex items-center justify-center px-4">
         <ExerciseRenderer
           exercise={currentExercise}
@@ -136,18 +124,31 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
         />
       </main>
 
-      {/* Bottom Action Footer (Before Answer Submission) */}
+      {/* Check footer */}
       {!isAnswered && (
-        <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-gray-200 p-4">
-          <div className="max-w-2xl mx-auto flex justify-end">
+        <footer
+          className="fixed bottom-0 left-0 right-0 z-40 px-3 sm:px-4 py-3 sm:py-4 border-t-2"
+          style={{
+            backgroundColor: "var(--navigation)",
+            borderColor: "var(--navigation-border)",
+          }}
+        >
+          <div className="max-w-2xl mx-auto flex justify-stretch sm:justify-end">
             <button
               onClick={handleCheck}
               disabled={!isCheckEnabled || isSubmitting}
-              className={`w-full sm:w-auto px-10 py-3.5 rounded-2xl font-extrabold text-base tracking-wider uppercase shadow-md cursor-pointer transition ${
-                isCheckEnabled
-                  ? "btn-duo-green"
-                  : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+              className={`w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-3.5 rounded-2xl font-extrabold text-sm sm:text-base tracking-wider uppercase shadow-md cursor-pointer transition ${
+                isCheckEnabled ? "btn-duo-green" : "cursor-not-allowed"
               }`}
+              style={
+                !isCheckEnabled
+                  ? {
+                      backgroundColor: "var(--card-elevated)",
+                      color: "var(--muted-foreground)",
+                      border: "2px solid var(--border)",
+                    }
+                  : {}
+              }
             >
               {isSubmitting ? "CHECKING..." : "CHECK"}
             </button>
@@ -155,7 +156,6 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
         </footer>
       )}
 
-      {/* Bottom Feedback Bar (After Answer Submission) */}
       <FeedbackBar
         isAnswered={isAnswered}
         isCorrect={isCorrect}
@@ -164,7 +164,6 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
         onContinue={handleContinue}
       />
 
-      {/* Out of Hearts Modal */}
       <OutOfHeartsModal
         isOpen={showOutOfHeartsModal}
         onRefill={handleRefillHearts}

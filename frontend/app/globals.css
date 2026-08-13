@@ -1,20 +1,155 @@
 @import "tailwindcss";
 
-@layer base {
-  body {
-    background-color: #f7f7f7;
-    color: #4b4b4b;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    user-select: none;
-  }
+/* ============================================================
+   CENTRALIZED THEME SYSTEM - CSS VARIABLES
+   Light Mode (default) & Dark Mode on html.dark
+   ============================================================ */
+
+:root {
+  /* Page */
+  --background:        #f3f4f6;
+  --foreground:        #111827;
+
+  /* Navigation */
+  --navigation:        #ffffff;
+  --navigation-border: #e5e7eb;
+  --nav-active-bg:     #f0f9ff;
+  --nav-active-text:   #0369a1;
+  --nav-inactive:      #9ca3af;
+
+  /* Cards */
+  --card:              #ffffff;
+  --card-border:       #e5e7eb;
+  --card-foreground:   #111827;
+  --card-elevated:     #f9fafb;
+
+  /* Text */
+  --muted:             #f9fafb;
+  --muted-foreground:  #6b7280;
+
+  /* Form */
+  --input:             #ffffff;
+  --input-border:      #d1d5db;
+
+  /* Button */
+  --btn-secondary-bg:  #ffffff;
+  --btn-secondary-text:#374151;
+  --btn-secondary-border:#d1d5db;
+
+  /* Misc */
+  --border:            #e5e7eb;
+  --ring:              #3b82f6;
+
+  /* Feedback */
+  --correct-bg:        #dcfce7;
+  --correct-border:    #86efac;
+  --correct-text:      #14532d;
+  --wrong-bg:          #fee2e2;
+  --wrong-border:      #fca5a5;
+  --wrong-text:        #7f1d1d;
 }
 
-/* Custom Duolingo-inspired 3D Buttons & Styling */
+html.dark {
+  /* Page */
+  --background:        #0f1923;
+  --foreground:        #f0f4f8;
+
+  /* Navigation */
+  --navigation:        #172331;
+  --navigation-border: #1e3347;
+  --nav-active-bg:     #1e3a55;
+  --nav-active-text:   #38bdf8;
+  --nav-inactive:      #4b6070;
+
+  /* Cards */
+  --card:              #1a2e3d;
+  --card-border:       #1e3347;
+  --card-foreground:   #f0f4f8;
+  --card-elevated:     #1f374a;
+
+  /* Text */
+  --muted:             #172331;
+  --muted-foreground:  #7d9aae;
+
+  /* Form */
+  --input:             #1a2e3d;
+  --input-border:      #1e3347;
+
+  /* Button */
+  --btn-secondary-bg:  #1f374a;
+  --btn-secondary-text:#e2eaf0;
+  --btn-secondary-border:#1e3347;
+
+  /* Misc */
+  --border:            #1e3347;
+  --ring:              #38bdf8;
+
+  /* Feedback */
+  --correct-bg:        #0d2e1a;
+  --correct-border:    #166534;
+  --correct-text:      #86efac;
+  --wrong-bg:          #2d0e0e;
+  --wrong-border:      #991b1b;
+  --wrong-text:        #fca5a5;
+}
+
+/* ============================================================
+   BASE STYLES - use CSS variables
+   ============================================================ */
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  user-select: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ============================================================
+   COMPONENT TOKENS - card-duo, btn-duo-*, nav, inputs
+   ============================================================ */
+
+.card-duo {
+  background-color: var(--card);
+  border: 2px solid var(--card-border);
+  border-bottom: 4px solid var(--card-border);
+  border-radius: 1rem;
+  color: var(--card-foreground);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* Navigation containers */
+.nav-container {
+  background-color: var(--navigation);
+  border-color: var(--navigation-border);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Secondary / white buttons */
+.btn-duo-white {
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 2px solid var(--btn-secondary-border);
+  border-bottom: 4px solid var(--btn-secondary-border);
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.btn-duo-white:hover:not(:disabled) {
+  background-color: var(--card-elevated);
+}
+
+.btn-duo-white:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+
+/* Green button */
 .btn-duo-green {
   background-color: #58cc02;
   color: #ffffff;
   border-bottom: 4px solid #46a302;
-  transition: all 0.1s ease;
+  transition: background-color 0.1s ease;
 }
 
 .btn-duo-green:hover:not(:disabled) {
@@ -26,11 +161,12 @@
   border-bottom-width: 2px;
 }
 
+/* Blue button */
 .btn-duo-blue {
   background-color: #1cb0f6;
   color: #ffffff;
   border-bottom: 4px solid #1899d6;
-  transition: all 0.1s ease;
+  transition: background-color 0.1s ease;
 }
 
 .btn-duo-blue:hover:not(:disabled) {
@@ -42,11 +178,12 @@
   border-bottom-width: 2px;
 }
 
+/* Red button */
 .btn-duo-red {
   background-color: #ff4b4b;
   color: #ffffff;
   border-bottom: 4px solid #ea2b2b;
-  transition: all 0.1s ease;
+  transition: background-color 0.1s ease;
 }
 
 .btn-duo-red:hover:not(:disabled) {
@@ -58,35 +195,160 @@
   border-bottom-width: 2px;
 }
 
-.btn-duo-white {
-  background-color: #ffffff;
-  color: #4b4b4b;
-  border: 2px solid #e5e5e5;
-  border-bottom: 4px solid #e5e5e5;
-  transition: all 0.1s ease;
+/* ============================================================
+   FEEDBACK BAR (lesson correct / wrong)
+   ============================================================ */
+
+.feedback-correct {
+  background-color: var(--correct-bg);
+  border-color: var(--correct-border);
+  color: var(--correct-text);
 }
 
-.btn-duo-white:hover:not(:disabled) {
-  background-color: #f7f7f7;
+.feedback-wrong {
+  background-color: var(--wrong-bg);
+  border-color: var(--wrong-border);
+  color: var(--wrong-text);
 }
 
-.btn-duo-white:active:not(:disabled) {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+
+.theme-input {
+  background-color: var(--input);
+  color: var(--foreground);
+  border: 2px solid var(--input-border);
+  border-bottom: 4px solid var(--input-border);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
-.card-duo {
-  background-color: #ffffff;
-  border: 2px solid #e5e5e5;
-  border-bottom: 4px solid #e5e5e5;
+.theme-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.theme-input:focus {
+  outline: none;
+  border-color: var(--ring);
+}
+
+/* ============================================================
+   EXERCISE CHOICE BUTTONS
+   ============================================================ */
+
+.choice-btn {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 2px solid var(--card-border);
+  border-bottom: 4px solid var(--card-border);
   border-radius: 1rem;
+  transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+  cursor: pointer;
 }
 
-/* Animations */
+.choice-btn:hover:not(:disabled) {
+  background-color: var(--card-elevated);
+}
+
+.choice-btn.selected {
+  background-color: #e0f2fe;
+  border-color: #38bdf8;
+  color: #0369a1;
+}
+
+html.dark .choice-btn.selected {
+  background-color: #0c2d44;
+  border-color: #38bdf8;
+  color: #bae6fd;
+}
+
+.choice-btn.matched {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+  opacity: 0.7;
+}
+
+html.dark .choice-btn.matched {
+  background-color: #0d2e1a;
+  border-color: #166534;
+  color: #86efac;
+  opacity: 0.7;
+}
+
+/* ============================================================
+   WORD TOKEN (Translate exercise assembly area)
+   ============================================================ */
+
+.word-token {
+  background-color: #e0f2fe;
+  border: 2px solid #7dd3fc;
+  border-bottom: 4px solid #7dd3fc;
+  color: #0369a1;
+  border-radius: 0.75rem;
+  font-weight: 800;
+  transition: background-color 0.1s ease;
+  cursor: pointer;
+}
+
+.word-token:hover:not(:disabled) {
+  background-color: #bae6fd;
+}
+
+html.dark .word-token {
+  background-color: #0c2d44;
+  border-color: #1d4ed8;
+  color: #bae6fd;
+}
+
+html.dark .word-token:hover:not(:disabled) {
+  background-color: #0e3a55;
+}
+
+/* Assembly tray */
+.assembly-tray {
+  background-color: var(--card);
+  border: 2px solid var(--border);
+  border-bottom: 4px solid var(--border);
+  border-radius: 1rem;
+  min-height: 72px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+
+.progress-track {
+  background-color: var(--border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   NAVIGATION LINK
+   ============================================================ */
+
+.nav-link {
+  color: var(--nav-inactive);
+  border-radius: 0.75rem;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-link.active {
+  background-color: var(--nav-active-bg);
+  color: var(--nav-active-text);
+  border: 2px solid var(--nav-active-text);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
 @keyframes pop {
-  0% { transform: scale(0.9); opacity: 0; }
-  70% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.9); opacity: 0; }
+  70%  { transform: scale(1.05); }
+  100% { transform: scale(1);   opacity: 1; }
 }
 
 .animate-pop {
@@ -95,9 +357,46 @@
 
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50%       { transform: translateY(-6px); }
 }
 
 .animate-bounce-subtle {
   animation: bounce-subtle 1.5s infinite ease-in-out;
+}
+
+/* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
+
+/* iOS safe-area: adds padding below fixed nav/footer for home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Responsive page container */
+.page-content {
+  width: 100%;
+  max-width: 42rem;   /* 672px — comfortable reading width */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .page-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Touch-friendly minimum tap target */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent text from overflowing on tiny screens */
+.text-balance {
+  text-wrap: balance;
 }

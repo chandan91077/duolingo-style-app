@@ -18,26 +18,36 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({
   const percentage = Math.min(100, Math.round((currentStep / totalSteps) * 100));
 
   return (
-    <header className="w-full max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-      {/* Exit Button */}
+    <header
+      className="w-full max-w-2xl mx-auto px-4 py-4 flex items-center gap-4"
+    >
+      {/* Exit */}
       <Link
         href="/learn"
-        className="text-gray-400 hover:text-gray-600 transition p-1"
+        className="transition p-1"
+        style={{ color: "var(--muted-foreground)" }}
         title="Quit lesson"
       >
         <X size={26} />
       </Link>
 
-      {/* Progress Bar Track */}
-      <div className="flex-1 h-3.5 bg-gray-200 rounded-full overflow-hidden relative">
+      {/* Progress Bar */}
+      <div className="progress-track flex-1 h-3.5">
         <div
           className="h-full bg-green-500 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>
 
-      {/* Hearts Counter */}
-      <div className="flex items-center gap-1.5 font-extrabold text-red-500 bg-red-50 px-2.5 py-1 rounded-xl border border-red-200">
+      {/* Hearts */}
+      <div
+        className="flex items-center gap-1.5 font-extrabold px-2.5 py-1 rounded-xl border"
+        style={{
+          backgroundColor: "var(--muted)",
+          borderColor: "var(--border)",
+          color: "#ef4444",
+        }}
+      >
         <Heart size={20} className="fill-current text-red-500" />
         <span className="text-sm">{hearts}</span>
       </div>

@@ -4,12 +4,13 @@ from app.database import get_db
 from app.models import Course, Unit, Skill, Lesson, UserLessonProgress
 from app.schemas import CourseResponse, UnitSchema, SkillSchema, LessonSummarySchema
 from app.services.progress_service import ProgressService
+from app.deps import get_current_user_id
 
 router = APIRouter(prefix="/api/course", tags=["Course"])
 
 
 @router.get("", response_model=CourseResponse)
-def get_course(user_id: int = 1, db: Session = Depends(get_db)):
+def get_course(user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
     """
     Returns the complete course learning path with units, skills, lessons, and progress/lock statuses.
     """

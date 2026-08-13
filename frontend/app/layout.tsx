@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "Duolingo-Style Language Learning App",
@@ -12,9 +13,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-100 min-h-screen text-gray-800 antialiased selection:bg-sky-200">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Anti-flash script: runs before paint to apply saved theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('duo-theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="antialiased min-h-screen transition-colors duration-300">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

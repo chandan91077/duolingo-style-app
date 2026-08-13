@@ -49,7 +49,7 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
           prompt={exercise.prompt}
           pairsDict={
             typeof exercise.options === "object" && exercise.options !== null
-              ? exercise.options
+              ? (exercise.options as Record<string, string>)
               : {}
           }
           onChange={onAnswerChange}
@@ -60,10 +60,9 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
     case "fill_blank":
       return (
         <FillBlankExercise
-          prompt={exercise.prompt}
-          options={Array.isArray(exercise.options) ? exercise.options : []}
-          selectedAnswer={selectedAnswer}
-          onSelect={onAnswerChange}
+          prompt="Fill in the blank:"
+          sentence={exercise.prompt}
+          onChange={onAnswerChange}
           disabled={disabled}
         />
       );

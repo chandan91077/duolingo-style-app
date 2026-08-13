@@ -2,8 +2,16 @@ from typing import List, Optional, Any
 from pydantic import BaseModel
 
 
+class AuthSyncRequest(BaseModel):
+    firebase_uid: str
+    email: str
+    name: str
+    avatar: Optional[str] = None
+
+
 class LearnerResponse(BaseModel):
     id: int
+    firebase_uid: Optional[str] = None
     name: str
     email: str
     avatar: Optional[str] = None

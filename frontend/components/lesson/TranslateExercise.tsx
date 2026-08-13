@@ -15,60 +15,56 @@ export const TranslateExercise: React.FC<TranslateExerciseProps> = ({
   onChange,
   disabled,
 }) => {
-  const [selectedTokens, setSelectedTokens] = useState<
-    { id: string; word: string }[]
-  >([]);
-  const [availableTokens, setAvailableTokens] = useState<
-    { id: string; word: string }[]
-  >([]);
+  const [selected, setSelected] = useState<{ id: string; word: string }[]>([]);
+  const [available, setAvailable] = useState<{ id: string; word: string }[]>([]);
 
   useEffect(() => {
-    // Convert string array to uniquely identifiable tokens
-    const tokens = wordBank.map((word, idx) => ({
-      id: `${word}-${idx}`,
-      word,
-    }));
-    setAvailableTokens(tokens);
-    setSelectedTokens([]);
+    const tokens = wordBank.map((word, idx) => ({ id: `${word}-${idx}`, word }));
+    setAvailable(tokens);
+    setSelected([]);
   }, [prompt, wordBank]);
 
-  const handleSelect = (token: { id: string; word: string }) => {
+  const pick = (token: { id: string; word: string }) => {
     if (disabled) return;
-    const newSelected = [...selectedTokens, token];
-    setSelectedTokens(newSelected);
-    setAvailableTokens(availableTokens.filter((t) => t.id !== token.id));
-
-    const sentence = newSelected.map((t) => t.word).join(" ");
-    onChange(sentence);
+    const next = [...selected, token];
+    setSelected(next);
+    setAvailable(available.filter((t) => t.id !== token.id));
+    onChange(next.map((t) => t.word).join(" "));
   };
 
-  const handleDeselect = (token: { id: string; word: string }) => {
+  const drop = (token: { id: string; word: string }) => {
     if (disabled) return;
-    const newSelected = selectedTokens.filter((t) => t.id !== token.id);
-    setSelectedTokens(newSelected);
-    setAvailableTokens([...availableTokens, token]);
-
-    const sentence = newSelected.map((t) => t.word).join(" ");
-    onChange(sentence);
+    const next = selected.filter((t) => t.id !== token.id);
+    setSelected(next);
+    setAvailable([...available, token]);
+    onChange(next.map((t) => t.word).join(" "));
   };
 
   return (
     <div className="w-full max-w-xl mx-auto py-6">
-      <h2 className="text-2xl font-extrabold text-gray-800 mb-6">{prompt}</h2>
+      <h2
+        className="text-2xl font-extrabold mb-6"
+        style={{ color: "var(--foreground)" }}
+      >
+        {prompt}
+      </h2>
 
-      {/* Assembly Area */}
-      <div className="min-h-[72px] bg-white border-2 border-b-4 border-gray-200 rounded-2xl p-3 flex flex-wrap items-center gap-2 mb-8 shadow-xs">
-        {selectedTokens.length === 0 ? (
-          <span className="text-sm font-semibold text-gray-400 italic px-2">
+      {/* Assembly tray */}
+      <div className="assembly-tray p-3 flex flex-wrap items-center gap-2 mb-8">
+        {selected.length === 0 ? (
+          <span
+            className="text-sm font-semibold italic px-2"
+            style={{ color: "var(--muted-foreground)" }}
+          >
             Tap words below to assemble your translation...
           </span>
         ) : (
-          selectedTokens.map((token) => (
+          selected.map((token) => (
             <button
               key={token.id}
-              onClick={() => handleDeselect(token)}
+              onClick={() => drop(token)}
               disabled={disabled}
-              className="bg-sky-100 border-2 border-b-4 border-sky-300 text-sky-800 font-extrabold px-3 py-1.5 rounded-xl text-sm shadow-xs transition hover:bg-sky-200 cursor-pointer animate-pop"
+              className="word-token px-3 py-1.5 text-sm animate-pop"
             >
               {token.word}
             </button>
@@ -76,12 +72,12 @@ export const TranslateExercise: React.FC<TranslateExerciseProps> = ({
         )}
       </div>
 
-      {/* Available Word Bank */}
+      {/* Word bank */}
       <div className="flex flex-wrap justify-center gap-2.5">
-        {availableTokens.map((token) => (
+        {available.map((token) => (
           <button
             key={token.id}
-            onClick={() => handleSelect(token)}
+            onClick={() => pick(token)}
             disabled={disabled}
             className="btn-duo-white px-4 py-2 rounded-xl text-sm font-bold shadow-xs cursor-pointer disabled:opacity-50"
           >

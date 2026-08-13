@@ -9,19 +9,23 @@ class StreakService:
         """
         Calculates and updates user streak based on activity date.
         Rules:
-        - Same calendar day: streak unchanged
+        - First time / no activity date: streak = 1, set today
+        - Same calendar day: streak stays active (at least 1)
         - Yesterday (1 day gap): streak += 1
-        - Missed day (>1 day gap or no previous activity): streak resets to 1
+        - Missed day (>1 day gap): streak resets to 1
         """
         today_str = date.today().isoformat()
         
         if not user.last_activity_date:
-            user.streak = 1
+            user.streak = max(1, user.streak)
             user.last_activity_date = today_str
             db.commit()
             return user.streak
 
         if user.last_activity_date == today_str:
+            if user.streak < 1:
+                user.streak = 1
+                db.commit()
             return user.streak
 
         last_date = date.fromisoformat(user.last_activity_date)
@@ -29,7 +33,7 @@ class StreakService:
         diff = (today_date - last_date).days
 
         if diff == 1:
-            user.streak += 1
+            user.streak = max(1, user.streak + 1)
         elif diff > 1:
             user.streak = 1
 

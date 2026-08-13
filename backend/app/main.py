@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.database import engine, Base
-from app.routers import learner, course, lessons, leaderboard, profile
+from app.routers import learner, course, lessons, leaderboard, profile, auth
 
 load_dotenv()
 
@@ -30,6 +30,7 @@ app.add_middleware(
 )
 
 # Register routers
+app.include_router(auth.router)
 app.include_router(learner.router)
 app.include_router(course.router)
 app.include_router(lessons.router)

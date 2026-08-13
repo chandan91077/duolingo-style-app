@@ -23,70 +23,7 @@ def seed_database():
     db = SessionLocal()
 
     try:
-        print("Seeding Users...")
-        # Main learner (User ID = 1)
-        today_str = date.today().isoformat()
-        alex = User(
-            id=1,
-            name="Alex",
-            email="alex@example.com",
-            avatar="🚀",
-            total_xp=120,
-            streak=4,
-            hearts=5,
-            gems=120,
-            daily_xp_goal=50,
-            last_activity_date=today_str,
-        )
-
-        # Leaderboard competing users
-        priya = User(
-            id=2,
-            name="Priya",
-            email="priya@example.com",
-            avatar="⭐",
-            total_xp=720,
-            streak=12,
-            hearts=5,
-            gems=350,
-            daily_xp_goal=50,
-        )
-        chandan = User(
-            id=3,
-            name="Chandan",
-            email="chandan@example.com",
-            avatar="🦁",
-            total_xp=540,
-            streak=8,
-            hearts=4,
-            gems=280,
-            daily_xp_goal=50,
-        )
-        rahul = User(
-            id=4,
-            name="Rahul",
-            email="rahul@example.com",
-            avatar="🎨",
-            total_xp=430,
-            streak=5,
-            hearts=5,
-            gems=200,
-            daily_xp_goal=50,
-        )
-        sofia = User(
-            id=5,
-            name="Sofia",
-            email="sofia@example.com",
-            avatar="🌸",
-            total_xp=310,
-            streak=3,
-            hearts=5,
-            gems=150,
-            daily_xp_goal=50,
-        )
-
-        db.add_all([alex, priya, chandan, rahul, sofia])
-        db.commit()
+        print("Skipping static fake users seeding (only real registered users will be kept)...")
 
         print("Seeding Achievements...")
         ach_first_lesson = Achievement(
