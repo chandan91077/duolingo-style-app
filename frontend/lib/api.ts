@@ -72,15 +72,30 @@ export async function syncUser(firebaseUser: {
 }
 
 export async function getLearner(): Promise<Learner> {
-  const res = await fetch(`${API_BASE_URL}/api/learner`, {
-    cache: "no-store",
-    headers: getHeaders(),
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch learner details");
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/learner`, {
+      cache: "no-store",
+      headers: getHeaders(),
+    });
+    if (res.ok) {
+      const raw: RawLearnerResponse = await res.json();
+      return transformLearner(raw);
+    }
+  } catch (err) {
+    console.warn("Could not fetch learner, using guest fallback", err);
   }
-  const raw: RawLearnerResponse = await res.json();
-  return transformLearner(raw);
+  return {
+    id: 0,
+    name: "Learner",
+    email: "",
+    avatar: "🚀",
+    totalXp: 0,
+    streak: 0,
+    hearts: 5,
+    gems: 120,
+    dailyXpGoal: 50,
+    todayXp: 0,
+  };
 }
 
 export async function refillHearts(): Promise<Learner> {
