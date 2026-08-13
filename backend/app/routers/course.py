@@ -16,6 +16,14 @@ def get_course(user_id: int = Depends(get_current_user_id), db: Session = Depend
     """
     course = db.query(Course).first()
     if not course:
+        try:
+            from app.seed import seed_database
+            seed_database()
+            course = db.query(Course).first()
+        except Exception as e:
+            print("Auto-seed course error:", e)
+
+    if not course:
         raise HTTPException(status_code=404, detail="No course found. Please seed the database.")
 
     unit_schemas = []

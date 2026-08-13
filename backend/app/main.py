@@ -44,6 +44,20 @@ app.include_router(leaderboard.router)
 app.include_router(profile.router)
 
 
+@app.on_event("startup")
+def startup_event():
+    try:
+        from app.database import SessionLocal
+        from app.models import Course
+        db = SessionLocal()
+        if not db.query(Course).first():
+            from app.seed import seed_database
+            seed_database()
+        db.close()
+    except Exception as e:
+        print("Startup seed error:", e)
+
+
 @app.get("/")
 def root():
     return {
